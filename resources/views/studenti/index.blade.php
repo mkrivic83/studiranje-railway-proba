@@ -21,7 +21,7 @@
     <th>Stipendija</th>
     <th>Mjesto</th>
     <th>Fakultet</th>
-    <th>Akcije</th>
+    <th>Akcije CRUD</th>
   </tr>
 
   @foreach($studenti as $s)

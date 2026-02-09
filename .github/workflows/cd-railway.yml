@@ -1,12 +1,15 @@
 name: CD - Deploy to Railway
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["CI za studiranje proba"]
+    types:
+      - completed
 
 jobs:
   deploy:
+    name: Deploy app
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'}}
     runs-on: ubuntu-latest
 
     steps:
