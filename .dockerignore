@@ -1,10 +1,12 @@
 .git
 .gitignore
 
-vendor
 node_modules
+vendor
 
-storage
+storage/logs
+storage/app
+
 bootstrap/cache
 
 .env
