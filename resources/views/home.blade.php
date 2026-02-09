@@ -20,6 +20,6 @@
 <li>middleware koji blokira prikaz (show/edit) studenata kojima je mjesto null</li>
 
 <li>2 testa (svaki ima 3 metode) i prolaze</li>
-<li>Sad je {{ now() }}</li>
+<li>Sad je {{ now()->format('d.m.Y H:i:s') }}</li>
 </ul>
 @endsection
