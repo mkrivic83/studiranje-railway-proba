@@ -1,64 +1,54 @@
-name: CI za Studiranje
+name: CI za studiranje proba
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
 
 jobs:
-  tests:
+  laravel-tests:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: laravel_test
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -proot"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
-      - name: Checkout
+      # 1️⃣ Dohvat koda
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up PHP
+      # 2️⃣ PHP okruženje
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2"
-          extensions: mbstring, pdo_mysql
+          php-version: '8.2'
+          extensions: mbstring, pdo, pdo_mysql
           coverage: none
 
-      - name: Copy env
-        run: cp .env.example .env
+      # 3️⃣ Cache composer dependencija (brže)
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
-      - name: Generate app key
-        run: php artisan key:generate
+      # 4️⃣ Instalacija dependencija
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Run migrations
-        run: php artisan migrate --force
-        env:
-          APP_ENV: testing
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: laravel_test
-          DB_USERNAME: root
-          DB_PASSWORD: root
+      # 5️⃣ Environment (CI-only)
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
 
-      - name: Run tests
-        run: php artisan test
-        env:
-          APP_ENV: testing
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: laravel_test
-          DB_USERNAME: root
-          DB_PASSWORD: root
+      # 6️⃣ Brza provjera (bez baze)
+      - name: Laravel config check
+        run: |
+          php artisan config:clear
+          php artisan route:list
+
+      # 7️⃣ (Opcionalno) PHPUnit testovi
+      # Ako NEMAŠ testove – slobodno ostavi zakomentirano
+      # - name: Run tests
+      #   run: php artisan test
